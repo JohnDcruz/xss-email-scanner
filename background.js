@@ -34,3 +34,14 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 
   sendResponse({xssFound: xssFound, xssLinks: xssLinks});
 });
+
+chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
+  // if the page has loaded, send message to content script
+  if (changeInfo.status == "complete") {
+    chrome.tabs.sendMessage(tabId, {message: "pageLoaded"}, function(response) {
+      if (response) {
+        console.log(response.message);
+      }
+    });
+  }
+});
