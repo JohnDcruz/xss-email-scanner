@@ -30,6 +30,15 @@ function checkLink(link) {
       }
     }
   }
+  
+  let embeddedLinks = link.match(/<\s*(?:iframe|script).*?src\s*=\s*["'](.*?)["']/);
+  if (embeddedLinks) {
+    for (let i = 1; i < embeddedLinks.length; i++) {
+      if (checkLink("href=\"" + embeddedLinks[i] + "\"")) {
+        return true;
+      }
+    }
+  }
   return false;
 }
 
