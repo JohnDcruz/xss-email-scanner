@@ -7,7 +7,7 @@ function getLinks(emailContents) {
         if (response.xssFound) {
           for (let i = 0; i < response.xssLinks.length; i++) {
             let link = response.xssLinks[i];
-            let newLink = "<p>Malicious link detected: " + link + "</p>";
+            let newLink = "<p style=\"color:red;\">(Malicious link detected: " + link + ")</p>";
             emailContents[0].innerHTML = emailContents[0].innerHTML.replace(link, newLink);
           }
         }
@@ -38,7 +38,28 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         else {
             getLinks(emailContents);
         }
-      }  
+      } else if (document.URL.includes("outlook.office.com")) {
+        let emailContents = document.getElementById("UniqueMessageBody");
+    
+        // if page hasn't loaded yet, try again every 100ms for 10 seconds
+        if (emailContents.length == 0) {
+            let count = 0;
+            let interval = setInterval(function() {
+                emailContents = document.getElementById("UniqueMessageBody");
+                if (emailContents.length > 0) {
+                    clearInterval(interval);
+                    getLinks(emailContents);
+                }
+                else if (count > 100) {
+                    clearInterval(interval);
+                }
+                count++;
+            }, 100);
+        }
+        else {
+            getLinks(emailContents);
+        }
+      }
     }
   
     sendResponse({message: "Content script received message"});
